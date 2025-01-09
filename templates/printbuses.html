@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Buses</title>
+</head>
+<body>
+    <h1>Available Buses</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Bus No</th>
+                <th>Departure Location</th>
+                <th>Departure Time</th>
+                <th>Destinations</th>
+                <th>Seats Available</th>
+                <th>Ticket Costs</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bus in buses %}
+                <tr>
+                    <td>{{ bus.Bus_No }}</td>
+                    <td>{{ bus.Departure_Location }}</td>
+                    <td>{{ bus.Departure_Time }}</td>
+                    <td>{{ bus.Destinations }}</td>
+                    <td>{{ bus.Seats_Available }}</td>
+                    <td>{{ bus.TicketCosts }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{% url 'bookticket' %}">Book a Ticket</a>
+</body>
+</html>

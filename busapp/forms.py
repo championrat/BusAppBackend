@@ -1,6 +1,7 @@
 from django import forms
+from django.core.validators import MinValueValidator
 from .models import BusDetails
-from .models import user
+from .models import User
 from .models import TicketDetails
 
 buses = BusDetails.objects.all()
@@ -13,18 +14,18 @@ class BusForm(forms.Form):
 
 class PassengerForm(forms.Form):
     passenger_name = forms.CharField(max_length=100, label = 'Passenger Name')
-    passenger_age = forms.IntegerField(min_value=0, label = 'Passenger Age')
+    passenger_age = forms.IntegerField(validators=[MinValueValidator(0)], label = 'Passenger Age')
 
 class UserForm(forms.Form):
     username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput, max_length=100)
     email = forms.EmailField(max_length=100)
     passenger_name = forms.CharField(max_length=100)
-    passenger_age = forms.IntegerField(min_value=0)
+    passenger_age = forms.IntegerField(validators=[MinValueValidator(0)])
 
     
 class TicketForm(forms.Form):
-    tno = forms.IntegerField(max_length=100)
+    tno = forms.IntegerField(label='Ticket Number')
     
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=100)

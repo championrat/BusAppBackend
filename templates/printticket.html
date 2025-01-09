@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Confirmation</title>
+</head>
+<body>
+    <h1>Ticket Booking Successful</h1>
+    <p>Your tickets have been successfully booked. Below are your ticket details:</p>
+
+    <h3>Ticket Details:</h3>
+    <ul>
+        <li>Bus No: {{ busno }}</li>
+        <li>Destination: {{ dest }}</li>
+        <li>Number of Passengers: {{ np }}</li>
+        <li>Departure Time: {{ dtime }}</li>
+        <li>Ticket Cost (per passenger): {{ tcost }}</li>
+        <li>Total Amount: {{ tamount }}</li>
+    </ul>
+
+    <h3>Passenger Details:</h3>
+    {% for form in passenger_forms %}
+        <ul>
+            <li>Passenger Name: {{ form.cleaned_data.passenger_name }}</li>
+            <li>Passenger Age: {{ form.cleaned_data.passenger_age }}</li>
+        </ul>
+    {% endfor %}
+
+    <br>
+    <a href="{% url 'printbuses' %}">Back to Available Buses</a>
+</body>
+</html>
