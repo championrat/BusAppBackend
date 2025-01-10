@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'busapp',
+    'rest_framework',
+    'rest_framwork_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +71,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'DBusApp.wsgi.application'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # This ensures authentication is required for views
+    ),
+}
 
 
 # Database

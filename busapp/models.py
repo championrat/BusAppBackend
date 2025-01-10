@@ -5,10 +5,13 @@ from django.core.validators import MinValueValidator
 class BusDetails(models.Model):
     Bus_No = models.IntegerField(unique=True)
     Departure_Location = models.CharField(max_length=100)
-    Departure_Time = models.TimeField()
-    Destinations = models.CharField(max_length=500)
+    Departure_Time = models.DateTimeField()
+    Destinations = models.TextField()
     Seats_Available = models.IntegerField()
-    TicketCosts = models.CharField(max_length=100)
+    TicketCosts = models.TextField()
+    
+    def __str__(self):
+        return f'Bus {self.Bus_No}'
 
 class TicketDetails(models.Model):
     Ticket_No = models.IntegerField(unique=True)
@@ -19,6 +22,7 @@ class TicketDetails(models.Model):
 class User(models.Model):
     username = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
+    usertype = models.CharField(max_length=10)
     email = models.EmailField(max_length=100, unique=True)
     passenger_name = models.CharField(max_length=100)
     passenger_age = models.IntegerField(validators=[MinValueValidator(0)])
