@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BusDetails, TicketDetails, User
+from .models import BusDetails, TicketDetails
 
 class BusDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,7 +11,7 @@ class TicketDetailsSerializer(serializers.ModelSerializer):
         model = TicketDetails
         fields = ['Ticket_No', 'Bus_No', 'Passenger_Name', 'Passenger_Age']
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'password', 'usertype', 'email', 'passenger_name', 'passenger_age']
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'password', 'usertype', 'email', 'passenger_name', 'passenger_age']
