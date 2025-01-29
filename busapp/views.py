@@ -26,6 +26,14 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 import os
 
+@csrf_exempt
+@api_view(['POST'])  # Ensures the view only accepts GET requests
+@authentication_classes([])  # Disable authentication for this view
+@permission_classes([AllowAny])  # Allow anyone to access this view
+def testAPI(request):
+    response_data = json.loads(request.body)
+    print(response_data)
+    return JsonResponse({'message': 'API test successful'}, status=200)
 
 @csrf_exempt
 @api_view(['GET'])  # Ensures the view only accepts GET requests
@@ -667,6 +675,33 @@ def validate_password_strength(password):
 #     # If successful
 #     return JsonResponse({'message': 'KYC successful, Driver registered', 'driver_info': result_DL['driver_info']}, status=200)
 
+
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_appToken(request):
+    appID = '52vn3f'
+    appKey = 'nf1yhe5el4g84ieulsh7'
+    
+    token_url = 'https://auth.hyperverge.co/login'
+    token_data = {
+        'appId': appID,
+        'appKey': appKey,
+        # 'expiry': 43200
+    }
+    
+    try:
+        response_AK = requests.post(token_url, data = token_data)
+        response_data_AK = response_AK.json()
+    except Exception as e:
+        return {'status': 'error', 'message': 'Error connecting to AppToken service', 'error': str(e)}
+    
+    if response_data_AK.get('status') == 'success':
+        appToken = response_data_AK.get('result', {}).get('token', '')
+        return JsonResponse({'appToken': appToken}, status=200)
+
+
 def dl_front_kyc(driver_license_front_path, driver_license_back_path):
     dl_url = 'https://ind.idv.hyperverge.co/v1/readId'
     headers = {
@@ -956,6 +991,40 @@ def driver_kyc(request):
 
 @csrf_exempt
 @api_view(['POST'])
+@permission_classes([IsDriverUser])  # Replace with your custom permission class
+def sdk_kyc(request):
+    try:
+        data = json.loads(request.body)
+        d_name = data.get('d_name')
+        d_dob = data.get('d_dob')
+        dl_doe = data.get('dl_doe')
+        dl_no = data.get('dl_no')
+        d_address = data.get('d_address')
+        d_phone = data.get('d_contact')
+        
+        if not all([d_name, d_dob, dl_doe, dl_no, d_address, d_phone]):
+            return JsonResponse({'message': 'All fields are required'}, status=400)
+        else:
+            driver = DriverDetails(
+                Driver_username=request.user.username,
+                Driver_Name=d_name,
+                Driver_DOB=datetime.strptime(d_dob, "%d-%m-%Y").strftime("%Y-%m-%d"),
+                DL_DOE=datetime.strptime(dl_doe, "%d-%m-%Y").strftime("%Y-%m-%d"),
+                Driver_License_No=dl_no,
+                Driver_Address=d_address,
+                Driver_Contact=d_phone
+            )
+            driver.save()
+            return JsonResponse({'message': 'KYC successful, Driver registered'}, status=200)
+    except json.JSONDecodeError:
+        # Handle case where the request body is not valid JSON
+        return JsonResponse({'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        # Catch any unexpected errors and return a generic error message
+        return JsonResponse({'message': str(e)}, status=400)
+        
+@csrf_exempt
+@api_view(['POST'])
 @authentication_classes([])  # Disable authentication for this view
 @permission_classes([AllowAny])  # Allow anyone to access this view
 def user_login(request):
@@ -1023,7 +1092,6 @@ def get_user_info(request):
 
     # Return the user data as a JSON response
     return JsonResponse(user_data)
-
 
 @csrf_exempt
 @api_view(['POST'])

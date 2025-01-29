@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/retrieve-ticket/', views.get_ticket_details, name='api_retrieve_ticket'),
+    path('api/test/', views.testAPI, name='api_test'),
 
     # Protected endpoints (authentication required)
     path('api/book-ticket/', views.bookticket, name='api_book_ticket'),
@@ -28,4 +29,6 @@ urlpatterns = [
     path('api/assign-bus/', views.assign_bus_to_driver, name='assign_bus'),
     path('api/driver/get-details/', views.get_driver_details, name='driver_details'),
     path('api/driver-kyc/', views.driver_kyc, name='driver_kyc'),
+    path('api/app-token/', views.get_appToken, name='app_token'),
+    path('api/sdk-kyc/', views.sdk_kyc, name='sdk_kyc'),
 ]
