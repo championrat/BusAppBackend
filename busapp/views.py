@@ -995,6 +995,7 @@ def driver_kyc(request):
 def sdk_kyc(request):
     try:
         data = json.loads(request.body)
+        print(data)
         d_name = data.get('d_name')
         d_dob = data.get('d_dob')
         dl_doe = data.get('dl_doe')
@@ -1008,8 +1009,8 @@ def sdk_kyc(request):
             driver = DriverDetails(
                 Driver_username=request.user.username,
                 Driver_Name=d_name,
-                Driver_DOB=datetime.strptime(d_dob, "%d-%m-%Y").strftime("%Y-%m-%d"),
-                DL_DOE=datetime.strptime(dl_doe, "%d-%m-%Y").strftime("%Y-%m-%d"),
+                Driver_DOB=datetime.strptime(d_dob, "%Y-%m-%d").strftime("%Y-%m-%d"),  # Update date format
+                DL_DOE=datetime.strptime(dl_doe, "%Y-%m-%d").strftime("%Y-%m-%d"), 
                 Driver_License_No=dl_no,
                 Driver_Address=d_address,
                 Driver_Contact=d_phone
@@ -1021,7 +1022,8 @@ def sdk_kyc(request):
         return JsonResponse({'message': 'Invalid JSON data'}, status=400)
     except Exception as e:
         # Catch any unexpected errors and return a generic error message
-        return JsonResponse({'message': str(e)}, status=400)
+        print(str(e))
+        return JsonResponse({'message': str(e)}, status=422)
         
 @csrf_exempt
 @api_view(['POST'])
