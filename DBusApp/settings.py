@@ -105,7 +105,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'DBusApp',  # Your MySQL database name
         'USER': 'django_user',  # Your MySQL username
-        'PASSWORD': 'Hv123456!',  # Your MySQL password
+        'PASSWORD': '<your_password>',  # Your MySQL password
         'HOST': 'localhost',  # Or the IP address of the MySQL server
         'PORT': '3306',  # Default MySQL port
     }
