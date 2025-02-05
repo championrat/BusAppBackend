@@ -1,3 +1,5 @@
 adarsh.pem
 godaddy_api.txt
 __pycache__/
+migrations/
+db.sqlite3

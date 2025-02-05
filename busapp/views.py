@@ -390,7 +390,7 @@ def get_appToken(request):
     token_data = {
         'appId': appID,
         'appKey': appKey,
-        # 'expiry': 43200
+        # 'expiry': 1800,
     }
     
     try:
@@ -727,6 +727,15 @@ def sdk_kyc(request):
         print(str(e))
         return JsonResponse({'message': str(e)}, status=422)
 
+import json
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import AllowAny
+from .models import KYCTxn  # Make sure this is correctly imported
+
 @csrf_exempt
 @permission_classes([AllowAny])  # Replace with your custom permission class
 def kyc_webhook(request):
@@ -735,7 +744,7 @@ def kyc_webhook(request):
 
     # Verify static header key
     preset_key = settings.HV_WEBHOOK_SECRET
-    received_key = request.headers.get("Webhook-Key")
+    received_key = request.headers.get("X-HV-Webhook-Key")
     if received_key != preset_key:
         return JsonResponse({"error": "Unauthorized"}, status=403)
 
@@ -752,10 +761,26 @@ def kyc_webhook(request):
         if not all([transaction_id, application_status, event_id, event_version, event_time, event_type]):
             return JsonResponse({"error": "Invalid payload. Don't send coffee when I'm a teapot"}, status=418)
 
-        # Check if this transaction ID already exists
-        is_duplicate = KYCTxn.objects.filter(transaction_id=transaction_id).exists()
+        # Call the external API to verify the transactionId
+        headers = {
+            "Content-Type": "application/json",
+            "appId": "52vn3f",
+            "appKey": "nf1yhe5el4g84ieulsh7",
+            "transactionId": transaction_id,
+        }
+        verification_response = requests.post(
+            "https://ind.idv.hyperverge.co/v1/link-kyc/results",
+            headers=headers,
+            json={"transactionId": transaction_id},
+            timeout=10
+        )
 
-        # Store the transaction, marking it as duplicate if needed
+        if verification_response.status_code != 200:
+            return JsonResponse({"error": "Transaction verification failed"}, status=400)
+        else:
+            print(verification_response.json())
+
+        # Store the transaction only after successful verification
         KYCTxn.objects.create(
             transaction_id=transaction_id,
             application_status=application_status,
@@ -764,14 +789,17 @@ def kyc_webhook(request):
             event_time=event_time,
             event_type=event_type,
             reviewer_email=reviewer_email,
-            duplicate=is_duplicate,  # Set to True if transaction already exists
         )
-        print(payload)
 
+        print(payload)
         return JsonResponse({"message": "Webhook received successfully"}, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    except requests.RequestException as e:
+        return JsonResponse({"error": f"Failed to verify transaction: {str(e)}"}, status=500)
+
 
 @csrf_exempt
 @api_view(['POST'])

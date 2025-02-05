@@ -50,7 +50,6 @@ class KYCTxn(models.Model):
     event_time = models.DateTimeField()
     event_type = models.CharField(max_length=100)
     reviewer_email = models.EmailField(null=True, blank=True)  # Optional
-    duplicate = models.BooleanField(default=False)  # New field to track duplicates
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
