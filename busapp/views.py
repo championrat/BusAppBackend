@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
 import django.db.utils
-from .models import BusDetails, TicketDetails, DriverDetails
+from .models import BusDetails, TicketDetails, DriverDetails, KYCTxn
 import json, requests
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -206,7 +206,6 @@ def cancel_ticket(request):
     else:
         return JsonResponse({'message': 'Only POST method is allowed.'}, status=405)
 
-
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Allow anyone to access this view
@@ -379,303 +378,6 @@ def validate_password_strength(password):
         return False
 
     return True
-
-# def dl_front_kyc(driver_license_front):
-#     # KYC API URL and headers
-#     dl_url = 'https://ind.idv.hyperverge.co/v1/readId'
-#     headers = {
-#         'appId': '52vn3f',
-#         'appKey': 'nf1yhe5el4g84ieulsh7',
-#         'transactionId': '3'
-#     }
-
-#     # Prepare files and form data for the API call
-#     dlf_files = {'image': driver_license_front}
-#     dlf_data = {
-#         'countryId': 'ind',
-#         'documentId': 'dl',
-#         'expectedDocumentSide': 'front',
-#         'preferences.returnScore': 'yes',
-#         'preferences.returnConfidence': 'yes',
-#         'qualityChecks.glare': 'yes',
-#         'qualityChecks.blur': 'yes',
-#         'qualityChecks.blackAndWhite': 'yes',
-#         'qualityChecks.capturedFromScreen': 'yes',
-#         'qualityChecks.partialId': 'yes',
-#         # 'qualityChecks.faceClear': 'yes',
-#         'qualityChecks.faceNotClear': 'yes',
-#         'qualityChecks.face': 'yes',
-#         'qualityChecks.obscuredId': 'yes',
-#         'qualityChecks.cutId': 'yes',
-#         'forgeryChecks.text': 'yes',
-#         'forgeryChecks.photo': 'yes',
-#         'forgeryChecks.emblem': 'yes',
-#         'forgeryChecks.dob': 'yes',
-#         'forgeryChecks.dobColon': 'yes',
-#         'forgeryChecks.idNumberLength': 'yes',
-#         'forgeryChecks.expiry': 'yes',
-#         'forgeryChecks.provinceMismatch': 'yes',
-#         'forgeryChecks.genderAndDOBMismatch': 'yes',
-#         'forgeryChecks.qrMismatch': 'yes',
-#         'ruleChecks.idNumber': 'yes',
-#         'ruleChecks.dateOfBirth': 'yes',
-#         'ruleChecks.dateOfIssue': 'yes',
-#         'ruleChecks.dateOfExpiry': 'yes',
-#         'forgeryChecks.facePhoto': 'yes',
-#         'forgeryChecks.digitalText': 'yes',
-#         'forgeryChecks.physicalText': 'yes',
-#         'forgeryChecks.colorPrintout': 'yes'
-#     }
-
-#     # Make API request
-#     try:
-#         response_f = requests.post(dl_url, headers=headers, files=dlf_files, data=dlf_data)
-#         response_data_f = response_f.json()
-#     except Exception as e:
-#         return {'status': 'error', 'message': 'Error connecting to DL Verification service', 'error': str(e)}
-
-#     # Handle API response
-#     if response_data_f.get('status') == 'success':
-#         details_f = response_data_f.get('result', {}).get('details', [])[0]
-#         extracted_fields_f = details_f.get('fieldsExtracted', {})
-#         quality_checks_f = details_f.get('qualityChecks', {})
-
-#         # Validate quality checks
-#         failed_quality_checks_f = {
-#             key: value for key, value in quality_checks_f.items() 
-#             if value.get('value') in ['yes'] and value.get('confidence') == 'high'
-#         }
-
-#         # Check for low confidence in critical fields
-#         critical_fields = ['fullName', 'dateOfBirth', 'idNumber']
-#         low_confidence_fields_f = {
-#             field: extracted_fields_f[field]
-#             for field in critical_fields
-#             if extracted_fields_f.get(field, {}).get('confidence', '') == 'low'
-#         }
-
-#         # Determine retry status based on quality checks and low confidence
-#         if failed_quality_checks_f or low_confidence_fields_f:
-#             return {
-#                 'status': 'retry',
-#                 'failed_quality_checks': failed_quality_checks_f,
-#                 'low_confidence_fields': low_confidence_fields_f
-#             }
-
-#         driver_info = {
-#             'full_name': extracted_fields_f.get('fullName', {}).get('value', ''),
-#             'dob': extracted_fields_f.get('dateOfBirth', {}).get('value', ''),
-#             'id_number': extracted_fields_f.get('idNumber', {}).get('value', ''),
-#             'license_expiry': extracted_fields_f.get('dateOfExpiry', {}).get('value', ''),
-#         }
-
-#         return {'status': 'success', 'driver_info': driver_info}
-
-#     elif response_data_f.get('status') == 'failure':
-#         error_message = response_data_f.get('result', {}).get('error', 'Unexpected error')
-#         return {'status': 'error', 'error': error_message}
-    
-#     return {'status': 'error', 'message': 'Unexpected error occurred'}
-
-# def livenessCheck(driver_selfie_file):
-#     # Liveness check API URL and headers
-#     liveness_url = 'https://ind.idv.hyperverge.co/v1/checkLiveness'
-#     headers = {
-#         'appId': '52vn3f',
-#         'appKey': 'nf1yhe5el4g84ieulsh7',
-#         'transactionId': '3'
-#     }
-#     selfie_files = {'image': driver_selfie_file}
-#     selfie_data = {
-#         'qualityChecks.eyesClosed': 'yes',
-#         'qualityChecks.blur': 'yes',
-#         'qualityChecks.maskPresent': 'yes',
-#         'qualityChecks.multipleFaces': 'yes',
-#         'qualityChecks.hat': 'yes',
-#         'qualityChecks.sunglasses': 'yes',
-#         'qualityChecks.readingGlasses': 'yes',
-#         'qualityChecks.dull': 'yes',
-#         'qualityChecks.lowQuality': 'yes',
-#         'qualityChecks.bright': 'yes',
-#         'qualityChecks.headTurned': 'yes',
-#         'qualityChecks.eyewear': 'yes',
-#         'qualityChecks.occlusion': 'yes',
-#         'qualityChecks.nudity': 'yes',
-#         # 'qualityChecks.nonWhiteBackground': 'yes',
-#         'ageRange': 'yes',
-#         'fraudChecks.checkDeepfake': 'yes',
-#         'fraudChecks.checkAnomaly': 'yes'
-#     }
-    
-#     try:
-#         response_s = requests.post(liveness_url, headers=headers, files=selfie_files, data=selfie_data)
-#         response_data_s = response_s.json()
-#     except Exception as e:
-#         return {'status': 'error', 'message': 'Error connecting to LivenessCheck service', 'error': str(e)}
-    
-#     if response_data_s.get('status') == 'success':
-#         # details_s = response_data_s.get('result', {}).get('details', {})
-#         liveFace = response_data_s.get('result', {}).get('details', {}).get('liveFace', {})
-#         quality_checks_s = response_data_s.get('result', {}).get('details', {}).get('qualityChecks', {})
-#         # print(liveFace.get('value'))
-        
-#         # Validate quality checks
-#         failed_quality_checks_s = {
-#             (key, value) : value for key, value in quality_checks_s.items() 
-#             if key != 'faceClear' and value.get('value') in ['yes'] and value.get('confidence') == 'high'
-#         }
-        
-#         if liveFace.get('value') == 'no' and liveFace.get('confidence') == 'high':
-#             return {'status': 'retry', 'message': 'Liveness check failed'}
-#         elif failed_quality_checks_s:
-#             return {'status': 'retry', 'failed_quality_checks': failed_quality_checks_s}
-#         else:
-#             return {'status': 'success'}
-        
-# def facematch_check(driver_selfie_file, driver_license_front):
-#     # FaceMatch API URL and headers
-#     facematch_url = 'https://ind.idv.hyperverge.co/v1/matchFace'
-#     headers = {
-#         'appId': '52vn3f',
-#         'appKey': 'nf1yhe5el4g84ieulsh7',
-#         'transactionId': '3',
-#         # 'Content-Type' : 'multipart/form-data'
-#     }
-#     fm_files = {
-#         'selfie': driver_selfie_file,
-#         'id': driver_license_front
-#     }
-    
-#     # fm_files = {
-#     #     'selfie': (driver_selfie_file.name, driver_selfie_file, driver_selfie_file.content_type),
-#     #     'id': (driver_license_front.name, driver_license_front, driver_license_front.content_type)
-#     # }
-    
-#     # Open test files (make sure the files exist and are small)
-#     # with open('/home/user/Documents/DBusApp/busapp/TN-DL_FRONT.jpg', 'rb') as driver_selfie_file, open('/home/user/Documents/DBusApp/busapp/TN-DL_FRONT.jpg', 'rb') as driver_license_front:
-#     #     fm_files = {
-#     #         'selfie': ('selfie.jpg', driver_selfie_file, 'image/jpeg'),
-#     #         'id': ('id_card.jpg', driver_license_front, 'image/jpeg')
-#     #     }
-    
-#     # selfie_size = driver_selfie_file.size
-#     # license_size = driver_license_front.size
-#     # print(f"Selfie size: {selfie_size} bytes")
-#     # print(f"License front size: {license_size} bytes")
-    
-#     try:
-#         response_fm = requests.post(facematch_url, headers=headers, files=fm_files, stream=True)
-#         response_data_fm = response_fm.json()
-#     except Exception as e:
-#         print(str(e))
-#         return {'status': 'error', 'message': 'Error connecting to FaceMatch service', 'error': str(e)}
-    
-#     if response_data_fm.get('status') == 'success':
-#         results = response_data_fm.get('result', {}).get('details', {}).get('match', {}).get('value', '')
-#         confidence = response_data_fm.get('result', {}).get('details', {}).get('match', {}).get('confidence', '')
-        
-#         if results == 'yes' and confidence == 'high':
-#             return {'status': 'success'}
-#         elif results == 'no' and confidence == 'high':
-#             return {'status': 'retry', 'message': 'FaceMatch requires retry'}
-#         elif results == 'yes' and confidence == 'low':
-#             return {'status': 'retry', 'message': 'FaceMatch requires retry'}
-#     else:
-#         print(response_data_fm.get('status'))
-#         print(response_data_fm)
-#         return {'status': 'error', 'message': 'FaceMatch failed'}            
-
-
-# @csrf_exempt
-# @api_view(['POST'])
-# @permission_classes([IsDriverUser])  # Replace with your custom permission class
-# def driver_kyc(request):
-
-    
-#     if not request.content_type.startswith('multipart/form-data'):
-#         return JsonResponse({'message': 'Content-Type must be multipart/form-data'}, status=400)
-    
-#     # Ensure the request contains both data and files
-#     if not request.FILES or 'driver-license-front' not in request.FILES or 'driver-selfie' not in request.FILES:
-#         return JsonResponse({'message': 'Driver license files and selfie are required'}, status=400)
-
-#     # Extract data from the request
-#     driver_address = request.POST.get('driver-address')
-#     driver_phone = request.POST.get('driver-phone')
-#     driver_license_front = request.FILES['driver-license-front']  # Uploaded file
-#     print(driver_license_front.size/1024)
-#     driver_license_back = request.FILES.get('driver-license-back')  # Mandatory file
-#     driver_selfie_file = request.FILES.get('driver-selfie')  # Mandatory selfie file
-
-#     fp_dlf = default_storage.save(f'dlf_{request.user.username}.jpg',ContentFile(driver_license_front))
-#     fp_dlb = default_storage.save(f'dlb_{request.user.username}.jpg',ContentFile(driver_license_back))
-    
-#     # Validate input
-#     if not all([driver_address, driver_phone]):
-#         return JsonResponse({'message': 'All fields are required'}, status=400)
-    
-#     DL_ver = False
-#     S_ver = False
-#     FM_ver = False
-    
-#     # Perform DL verification using helper fn
-#     result_DL = dl_front_kyc(driver_license_front)
-    
-#     # Handle the result and return appropriate response
-#     if result_DL['status'] == 'error':
-#         return JsonResponse({'message': result_DL['message'], 'error': result_DL['error']}, status=500)
-
-#     elif result_DL['status'] == 'retry':
-#         return JsonResponse({
-#             'message': 'DL verification requires retry',
-#             'failed_quality_checks': result_DL['failed_quality_checks'],
-#             'low_confidence_fields': result_DL['low_confidence_fields']
-#         }, status=422)
-    
-#     elif result_DL['status'] == 'success':
-#         DL_ver = True
-#     else:
-#         return JsonResponse({'message': 'Unexpected error occurred'}, status=500)
-    
-#     # Perform selfie liveness check if DL verification is successful
-#     result_LV = livenessCheck(driver_selfie_file)
-    
-#     # Handle the result and return appropriate response
-#     if result_LV['status'] == 'error':
-#         return JsonResponse({'message': result_LV['message'], 'error': result_LV['error']}, status=422)
-#     elif result_LV['status'] == 'retry':
-#         return JsonResponse({'message': 'Liveness check requires retry', 'failed_quality_checks': result_LV['failed_quality_checks']}, status=400)
-#     elif result_LV['status'] == 'success':
-#         S_ver = True
-    
-#     # Perform facematch between selfie and DL photo if selfie liveness check is successful
-#     result_FM = facematch_check(driver_selfie_file, driver_license_front)
-    
-#     # Handle the result and return appropriate response
-#     if result_FM['status'] == 'retry':
-#         return JsonResponse({'message': result_FM['message']}, status=400)
-#     elif result_FM['status'] == 'error':
-#         return JsonResponse({'message': result_FM['message']}, status=500)
-#     elif result_FM['status'] == 'success':
-#         FM_ver = True
-    
-#     if DL_ver and S_ver and FM_ver:
-#         # Save the driver details to the database
-#         driver = DriverDetails(
-#             Driver_username = request.user.username,
-#             Driver_Name = result_DL['driver_info']['full_name'],
-#             Driver_DOB = datetime.strptime(result_DL['driver_info']['dob'], "%d-%m-%Y").strftime("%Y-%m-%d"),
-#             DL_DOE = datetime.strptime(result_DL['driver_info']['license_expiry'], "%d-%m-%Y").strftime("%Y-%m-%d"),
-#             Driver_License_No = result_DL['driver_info']['id_number'],
-#             Driver_Address = driver_address,
-#             Driver_Contact = driver_phone
-#         )
-#         driver.save()
-    
-#     # If successful
-#     return JsonResponse({'message': 'KYC successful, Driver registered', 'driver_info': result_DL['driver_info']}, status=200)
-
-
 
 @csrf_exempt
 @api_view(['GET'])
@@ -1024,7 +726,53 @@ def sdk_kyc(request):
         # Catch any unexpected errors and return a generic error message
         print(str(e))
         return JsonResponse({'message': str(e)}, status=422)
-        
+
+@csrf_exempt
+@permission_classes([AllowAny])  # Replace with your custom permission class
+def kyc_webhook(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    # Verify static header key
+    preset_key = settings.HV_WEBHOOK_SECRET
+    received_key = request.headers.get("Webhook-Key")
+    if received_key != preset_key:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    try:
+        payload = json.loads(request.body)
+        transaction_id = payload.get("transactionId")
+        application_status = payload.get("applicationStatus")
+        event_id = payload.get("eventId")
+        event_version = payload.get("eventVersion")
+        event_time = payload.get("eventTime")
+        event_type = payload.get("eventType")
+        reviewer_email = payload.get("reviewerEmail", None)
+
+        if not all([transaction_id, application_status, event_id, event_version, event_time, event_type]):
+            return JsonResponse({"error": "Invalid payload. Don't send coffee when I'm a teapot"}, status=418)
+
+        # Check if this transaction ID already exists
+        is_duplicate = KYCTxn.objects.filter(transaction_id=transaction_id).exists()
+
+        # Store the transaction, marking it as duplicate if needed
+        KYCTxn.objects.create(
+            transaction_id=transaction_id,
+            application_status=application_status,
+            event_id=event_id,
+            event_version=event_version,
+            event_time=event_time,
+            event_type=event_type,
+            reviewer_email=reviewer_email,
+            duplicate=is_duplicate,  # Set to True if transaction already exists
+        )
+        print(payload)
+
+        return JsonResponse({"message": "Webhook received successfully"}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
 @csrf_exempt
 @api_view(['POST'])
 @authentication_classes([])  # Disable authentication for this view

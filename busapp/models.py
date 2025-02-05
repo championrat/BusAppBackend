@@ -41,3 +41,17 @@ class DriverDetails(models.Model):
     #     if isinstance(self.DL_DOE, datetime):
     #         self.DL_DOE = self.DL_DOE.date()  # Get the date part of datetime
     #     super().save(*args, **kwargs)
+    
+class KYCTxn(models.Model):
+    transaction_id = models.CharField(max_length=255)  # No uniqueness constraint
+    application_status = models.CharField(max_length=100)
+    event_id = models.CharField(max_length=255)
+    event_version = models.CharField(max_length=50)
+    event_time = models.DateTimeField()
+    event_type = models.CharField(max_length=100)
+    reviewer_email = models.EmailField(null=True, blank=True)  # Optional
+    duplicate = models.BooleanField(default=False)  # New field to track duplicates
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"KYC Txn {self.transaction_id} - {self.application_status} ({'DUPLICATE' if self.duplicate else 'UNIQUE'})"

@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/retrieve-ticket/', views.get_ticket_details, name='api_retrieve_ticket'),
     path('api/test/', views.testAPI, name='api_test'),
+    path('api/kyc-webhook/', views.kyc_webhook, name='api_webhook'),
 
     # Protected endpoints (authentication required)
     path('api/book-ticket/', views.bookticket, name='api_book_ticket'),

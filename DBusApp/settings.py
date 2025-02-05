@@ -23,11 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-_v2n8gsk!sz(jvj-$9#_e8y7i$=ei5sjd&*wnout$zvgx)u5-i'
+HV_WEBHOOK_SECRET = 'lSDptG!Zr__J<wCh9d7ua.U8Ky<a^{7Tt/Q);/MTOa}MvSCH;[Cn)_{baV~C(po'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
