@@ -715,7 +715,8 @@ def sdk_kyc(request):
                 DL_DOE=datetime.strptime(dl_doe, "%Y-%m-%d").strftime("%Y-%m-%d"), 
                 Driver_License_No=dl_no,
                 Driver_Address=d_address,
-                Driver_Contact=d_phone
+                Driver_Contact=d_phone,
+                KYC_Status = True
             )
             driver.save()
             return JsonResponse({'message': 'KYC successful, Driver registered'}, status=200)
@@ -725,7 +726,10 @@ def sdk_kyc(request):
     except Exception as e:
         # Catch any unexpected errors and return a generic error message
         print(str(e))
-        return JsonResponse({'message': str(e)}, status=422)
+        if str(e).__contains__("UNIQUE constraint failed") :
+            return JsonResponse({'message': 'KYC already complete'}, status=409)
+        else:
+            return JsonResponse({'message': str(e)}, status=422)
 
 import json
 import requests

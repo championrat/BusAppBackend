@@ -3,3 +3,5 @@ godaddy_api.txt
 __pycache__/
 migrations/
 db.sqlite3
+DBusApp/.env
+*.pyc

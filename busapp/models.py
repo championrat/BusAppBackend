@@ -33,6 +33,7 @@ class DriverDetails(models.Model):
     Driver_License_No = models.CharField(max_length=100)
     Driver_Address = models.TextField(default='bro is homeless')
     Driver_Contact = models.CharField(max_length=100)
+    KYC_Status = models.BooleanField(default=False)
     
     # def save(self, *args, **kwargs):
     #     # Extract just the date from the datetime object
