@@ -5,3 +5,4 @@ pymysql
 djangorestframework-simplejwt
 django-cors-headers
 Pillow
+django-environ
